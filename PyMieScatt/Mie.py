@@ -19,6 +19,8 @@ def MieQ(m, wavelength, diameter, nMedium=1.00027316, asDict=False, asCrossSecti
 #  http://pymiescatt.readthedocs.io/en/latest/forward.html#MieQ
   nMedium = nMedium.real
   m /= nMedium
+  # x = pi*d/lambda uses the wavelength in the medium, as in every other function.
+  wavelength /= nMedium
   x = np.pi*diameter/wavelength
   if x==0:
     return 0, 0, 0, 1.5, 0, 0, 0
