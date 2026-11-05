@@ -566,30 +566,25 @@ def ContourIntersection_SD(Bsca,Babs,wavelength,dp,ndp,n=None,k=None,nMin=1,nMax
 
   return solutionSet,forwardCalculations,solutionErrors, fig, ax, graphElements
 
+def contour_segments(chart):
+  # ContourSet.collections was removed in matplotlib 3.10; allsegs and
+  # get_segments() give the same vertex arrays in old and new versions.
+  if isinstance(chart, QuadContourSet):
+    return chart.allsegs[0]
+  elif isinstance(chart, LineCollection):
+    return chart.get_segments()
+
 def find_intersections(A,B):
   X = []
   Y = []
-  if isinstance(A, QuadContourSet):
-    pathOne = A.collections[0]
-  elif isinstance(A, LineCollection):
-    pathOne = A
-  if isinstance(B, QuadContourSet):
-    pathTwo = B.collections[0]
-  elif isinstance(B, LineCollection):
-    pathTwo = B
-  for p1 in pathOne.get_paths():
-    for p2 in pathTwo.get_paths():
-      v1 = p1.vertices
-      v2 = p2.vertices
-
+  for v1 in contour_segments(A):
+    for v2 in contour_segments(B):
       poly1 = geometry.LineString(v1)
       poly2 = geometry.LineString(v2)
       sol = poly1.intersection(poly2)
-      if type(sol)==geometry.point.Point:
-        X.append(sol.x)
-        Y.append(sol.y)
-      else:
-        for s in sol:
+      # Multi-part geometries are not iterable in shapely 2.0; use .geoms.
+      for s in getattr(sol, 'geoms', [sol]):
+        if isinstance(s, geometry.Point) and not s.is_empty:
           X.append(s.x)
           Y.append(s.y)
 
