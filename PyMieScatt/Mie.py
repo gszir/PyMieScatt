@@ -55,7 +55,7 @@ def MieQ(m, wavelength, diameter, nMedium=1.00027316, asDict=False, asCrossSecti
       cabs = css*qabs
       cpr = css*qpr
       cback = css*qback
-      cratio = css*qratio
+      cratio = qratio
       if asDict:
         return dict(Cext=cext,Csca=csca,Cabs=cabs,g=g,Cpr=cpr,Cback=cback,Cratio=cratio)
       else:
@@ -161,7 +161,7 @@ def RayleighMieQ(m, wavelength, diameter, nMedium=1.0, asDict=False, asCrossSect
       cabs = css*qabs
       cpr = css*qpr
       cback = css*qback
-      cratio = css*qratio
+      cratio = qratio
       if asDict:
         return dict(Cext=cext,Csca=csca,Cabs=cabs,g=g,Cpr=cpr,Cback=cback,Cratio=cratio)
       else:
@@ -221,7 +221,7 @@ def LowFrequencyMieQ(m, wavelength, diameter, nMedium=1.0, asDict=False, asCross
       cabs = css*qabs
       cpr = css*qpr
       cback = css*qback
-      cratio = css*qratio
+      cratio = qratio
       if asDict:
         return dict(Cext=cext,Csca=csca,Cabs=cabs,g=g,Cpr=cpr,Cback=cback,Cratio=cratio)
       else:
