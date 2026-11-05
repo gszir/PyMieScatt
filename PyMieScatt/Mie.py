@@ -25,7 +25,8 @@ def MieQ(m, wavelength, diameter, nMedium=1.00027316, asDict=False, asCrossSecti
   if x==0:
     return 0, 0, 0, 1.5, 0, 0, 0
   elif x<=rayleigh_thresh:
-    return RayleighMieQ(m, wavelength, diameter, nMedium, asDict)
+    # m and wavelength are already relative to the medium.
+    return RayleighMieQ(m, wavelength, diameter, 1.0, asDict, asCrossSection)
   elif x>rayleigh_thresh:
     nmax = np.round(2+x+4*(x**(1/3)))
     n = np.arange(1,nmax+1)
