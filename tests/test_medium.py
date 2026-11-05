@@ -39,6 +39,23 @@ class MediumTests(unittest.TestCase):
                     scaled = ps.MieQ(m / WATER, WAVELENGTH / WATER, diameter, nMedium=1.0)
                     np.testing.assert_allclose(q, scaled, rtol=1e-12)
 
+    def test_mieq_rayleigh_branch_normalizes_once(self):
+        # x = pi*5*1.331/660 = 0.032, below MieQ's default rayleigh_thresh of 0.05.
+        for m in (1.4564 + 0j, 1.5 + 0.1j):
+            with self.subTest(m=m):
+                x = np.pi * 5.0 * WATER / WAVELENGTH
+                polarizability = ((m / WATER)**2 - 1) / ((m / WATER)**2 + 2)
+                rayleigh = ps.MieQ(m, WAVELENGTH, 5.0, nMedium=WATER)
+                self.assertAlmostEqual(rayleigh[1] / (8 / 3 * x**4 * abs(polarizability)**2), 1, places=12)
+                if m.imag:
+                    self.assertAlmostEqual(rayleigh[2] / (4 * x * polarizability.imag), 1, places=12)
+                np.testing.assert_allclose(rayleigh, ps.RayleighMieQ(m, WAVELENGTH, 5.0, nMedium=WATER), rtol=1e-12)
+                # The full series differs from the dipole limit only at order x^2.
+                full = ps.MieQ(m, WAVELENGTH, 5.0, nMedium=WATER, rayleigh_thresh=0)
+                np.testing.assert_allclose(rayleigh[:3], full[:3], rtol=5e-3)
+                cross = ps.MieQ(m, WAVELENGTH, 5.0, nMedium=WATER, asCrossSection=True)
+                self.assertAlmostEqual(cross[0] / (rayleigh[0] * np.pi * 2.5**2), 1, places=12)
+
     def test_core_shell_is_continuous_at_its_shortcuts(self):
         # A zero core or equal indices go through MieQ; a negligible core uses the coated-sphere branch.
         m_shell = 1.4564 + 0j
