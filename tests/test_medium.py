@@ -56,6 +56,22 @@ class MediumTests(unittest.TestCase):
                 cross = ps.MieQ(m, WAVELENGTH, 5.0, nMedium=WATER, asCrossSection=True)
                 self.assertAlmostEqual(cross[0] / (rayleigh[0] * np.pi * 2.5**2), 1, places=12)
 
+    def test_size_distribution_normalizes_once(self):
+        m = 1.5 + 0.1j
+        dp = np.linspace(100, 500, 40)
+        ndp = 1e3 * np.exp(-0.5 * ((dp - 300) / 50)**2)
+        result = ps.Mie_SD(m, WAVELENGTH, dp, ndp, nMedium=WATER)
+        np.testing.assert_allclose(result, ps.Mie_SD(m / WATER, WAVELENGTH / WATER, dp, ndp, nMedium=1.0), rtol=1e-12)
+        # SMPS=True sums cross sections per bin, in inverse megameters.
+        per_particle = np.array([ps.MieQ(m, WAVELENGTH, d, nMedium=WATER, asCrossSection=True)[:2] for d in dp])
+        np.testing.assert_allclose(result[:2], ndp @ per_particle * 1e-6, rtol=1e-12)
+
+    def test_wavelength_range_with_index_array_normalizes_once(self):
+        m = np.array([1.5 + 0.1j, 1.45 + 0.01j])
+        wavelengths, qext = ps.MieQ_withWavelengthRange(m, 300.0, nMedium=WATER, wavelengthRange=(500.0, 600.0))[:2]
+        expected = [ps.MieQ(index, wavelength, 300.0, nMedium=WATER)[0] for index, wavelength in zip(m, (500.0, 600.0))]
+        np.testing.assert_allclose(qext, expected, rtol=1e-12)
+
     def test_core_shell_is_continuous_at_its_shortcuts(self):
         # A zero core or equal indices go through MieQ; a negligible core uses the coated-sphere branch.
         m_shell = 1.4564 + 0j

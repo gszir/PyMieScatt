@@ -278,8 +278,9 @@ def Mie_SD(m, wavelength, dp, ndp, nMedium=1.0, SMPS=True, interpolate=False, as
   aSDn = np.pi*((dp/2)**2)*ndp*(1e-6)
 #  _logdp = np.log10(dp)
 
+  # m and wavelength are already relative to the medium.
   for i in range(_length):
-    Q_ext[i], Q_sca[i], Q_abs[i], g[i], Q_pr[i], Q_back[i], Q_ratio[i] = AutoMieQ(m,wavelength,dp[i],nMedium)
+    Q_ext[i], Q_sca[i], Q_abs[i], g[i], Q_pr[i], Q_back[i], Q_ratio[i] = AutoMieQ(m,wavelength,dp[i])
 
   if SMPS:
     Bext = np.sum(Q_ext*aSDn)
@@ -461,7 +462,7 @@ def MieQ_withWavelengthRange(m, diameter, nMedium=1.0, wavelengthRange=(100,1600
     _qD = [AutoMieQ(_m,wavelength,diameter) for wavelength in wavelengths]
   elif type(_m) in [np.ndarray,list,tuple] and len(_wavelengthRange)==len(_m):
     wavelengths=_wavelengthRange
-    _qD = [MieQ(emm,wavelength,diameter) for emm,wavelength in zip(_m,wavelengths)]
+    _qD = [MieQ(emm,wavelength,diameter,nMedium=1.0) for emm,wavelength in zip(_m,wavelengths)]
   else:
     warnings.warn("Error: the size of the input data is mismatched. Please examine your inputs and try again.")
     return
